@@ -1,4 +1,4 @@
-'use strict';
+
 
 const fs = require('fs');
 const path = require('path');
@@ -382,7 +382,7 @@ module.exports = {
         typescript: resolve.sync('typescript', {
           basedir: paths.appNodeModules,
         }),
-        async: false,
+        async: true,
         checkSyntacticErrors: true,
         tsconfig: paths.appTsConfig,
         compilerOptions: {
@@ -402,7 +402,7 @@ module.exports = {
           '!src/setupTests.*',
         ],
         watch: paths.appSrc,
-        silent: true,
+        silent: false,
         formatter: typescriptFormatter,
       }),
   ].filter(Boolean),
