@@ -38,6 +38,7 @@
     "jest-resolve": "23.6.0",
     "mini-css-extract-plugin": "0.4.3",
     "optimize-css-assets-webpack-plugin": "5.0.1",
+    "pixi.js": "^4.8.4",
     "pnp-webpack-plugin": "1.1.0",
     "postcss-flexbugs-fixes": "4.1.0",
     "postcss-loader": "3.0.0",
@@ -74,6 +75,7 @@
     "not op_mini all"
   ],
   "devDependencies": {
+    "@types/pixi.js": "^4.8.6",
     "@types/styled-components": "^4.1.4",
     "babel-plugin-styled-components": "^1.10.0"
   },
@@ -122,6 +124,8 @@
     "presets": [
       "react-app"
     ],
-    "plugins": ["babel-plugin-styled-components"]
+    "plugins": [
+      "babel-plugin-styled-components"
+    ]
   }
 }

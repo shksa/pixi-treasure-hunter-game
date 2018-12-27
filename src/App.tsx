@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
 import {ThemeProvider, css} from './styled-components'
 import * as s from './AppStyle'
-import Default from './pages/default';
+// import Default from './pages/Default';
+import TreasureHunter from './pages/TreasureHunter';
 
 export default class App extends Component {
   render() {
@@ -10,7 +11,8 @@ export default class App extends Component {
         <>
           <s.GlobalStyle />
           <s.AppWrapper>
-            <Default />
+            {/* <Default /> */}
+            <TreasureHunter />
           </s.AppWrapper>
         </>
       </ThemeProvider>
