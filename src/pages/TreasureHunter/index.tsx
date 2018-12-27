@@ -51,23 +51,45 @@ export default class TreasureHunter extends React.Component {
   gameState!: (deltaTime: number) => void
   playScene!: PIXI.Container
   gameOverScene!: PIXI.Container
-  healthBar!: HealthBarContainer
+  healthBarContainer!: HealthBarContainer
   movablePlaySceneAreaDims!: AreaDims
   gameOverSceneMessage!: PIXI.Text
-  isExplorerHit = false
   GAME_WIDTH = 1280
   GAME_HEIGHT = 720
-  DungeonWallWidth = 30
+  NumberOfBlobs = 100
+  DungeonWallWidth = 80
+  HealthBarWidth = 200
+  HealthBarHeight = 15
+
+  resize = () => {
+    // Determine which screen dimension is most constrained
+    const ratio = Math.min(window.innerWidth/this.GAME_WIDTH, window.innerHeight/this.GAME_HEIGHT)
+
+    // Scale the view appropriately to fill that dimension
+    this.pixiApp.stage.scale.x = this.pixiApp.stage.scale.y = ratio
+
+    // Update the renderer dimensions
+    this.pixiApp.renderer.resize(Math.ceil(this.GAME_WIDTH * ratio), Math.ceil(this.GAME_HEIGHT * ratio))
+
+    console.log("Resize\n" +"  Window inner " + window.innerWidth + "," + window.innerHeight +
+    " pixel ratio " + window.devicePixelRatio + "\n" +"  Renderer " + this.pixiApp.renderer.width + "," +
+    this.pixiApp.renderer.height + " res " + this.pixiApp.renderer.resolution + "\n" +"  Scale " + this.pixiApp.stage.scale.x + "," + this.pixiApp.stage.scale.y + "\n")
+  }
 
   setupGame = () => {
     // The application will create a renderer using WebGL, if possible,
     // with a fallback to a canvas render.
     // It will also setup the ticker and the root stage PIXI.Container
     this.pixiApp = new PIXI.Application({
-      width: this.GAME_WIDTH, height: this.GAME_HEIGHT, backgroundColor: 0x56a4b7
+      width: this.GAME_WIDTH, height: this.GAME_HEIGHT, backgroundColor: 0x56a4b7, autoResize: true,
+      resolution: window.devicePixelRatio, antialias: true,
     })
-
+    this.pixiApp.renderer.view.style.position = 'absolute'
+    this.pixiApp.renderer.view.style.top = '0px'
+    this.pixiApp.renderer.view.style.left = '0px'
+    this.resize()
     this.page.appendChild(this.pixiApp.view)
+    window.addEventListener('resize', this.resize)
     this.pixiLoader
       .add({name: 'GameTextureAtlas', url: '/game-assets/pixi-treasure-hunter-game.json'})
       .load(this.setupGameScenes)
@@ -89,17 +111,19 @@ export default class TreasureHunter extends React.Component {
     this.gameTextures = resources.GameTextureAtlas.textures as PIXI.loaders.TextureDictionary
 
     this.createSpriteAndAddToPlayScene(SpriteID.dungeon, 0, 0)
+    this.allSprites.dungeon.width = this.GAME_WIDTH
+    this.allSprites.dungeon.height = this.GAME_HEIGHT
     
     this.createSpriteAndAddToPlayScene(SpriteID.explorer)
     this.allSprites.explorer.x = this.DungeonWallWidth
-    this.allSprites.explorer.y = this.playScene.height / 2 - this.allSprites.explorer.height / 2
+    this.allSprites.explorer.y = this.GAME_HEIGHT / 2 - this.allSprites.explorer.height / 2
     this.allSprites.explorer.vx = 0
     this.allSprites.explorer.vy = 0
     this.bindKeyboardArrowKeysToExplorerMoves()
     
     this.createSpriteAndAddToPlayScene(SpriteID.treasure)
-    this.allSprites.treasure.x = this.playScene.width - this.allSprites.treasure.width - this.DungeonWallWidth
-    this.allSprites.treasure.y = this.playScene.height / 2 - this.allSprites.treasure.height / 2
+    this.allSprites.treasure.x = this.GAME_WIDTH - this.allSprites.treasure.width - this.DungeonWallWidth
+    this.allSprites.treasure.y = this.GAME_HEIGHT / 2 - this.allSprites.treasure.height / 2
 
     this.createSpriteAndAddToPlayScene(SpriteID.door, this.DungeonWallWidth, 0)
 
@@ -108,8 +132,8 @@ export default class TreasureHunter extends React.Component {
     this.createHealthBar()
 
     this.movablePlaySceneAreaDims = {
-      x: this.DungeonWallWidth, y: this.DungeonWallWidth - this.DungeonWallWidth / 2, 
-      width: this.playScene.width - this.DungeonWallWidth, height: this.playScene.height - this.DungeonWallWidth
+      x: this.DungeonWallWidth, y: 20, 
+      width: this.GAME_WIDTH - this.DungeonWallWidth, height: this.GAME_HEIGHT - 40
     }
 
     this.pixiApp.stage.addChild(this.playScene)
@@ -138,7 +162,7 @@ export default class TreasureHunter extends React.Component {
     // Left arrow key `press` method
     left.press = () => {
       //Change the husky's velocity when the key is pressed
-      explorer.vx = -5;
+      explorer.vx = -5
       explorer.vy = 0;
     }
 
@@ -185,7 +209,7 @@ export default class TreasureHunter extends React.Component {
   }
 
   createBlobSprites = (spriteID: string) => {
-    const blobSpritesArray = Array.from({length: 6}) as Array<Sprite>
+    const blobSpritesArray = Array.from({length: this.NumberOfBlobs}) as Array<Sprite>
     blobSpritesArray.forEach((_, idx, array) => {
       const blobSprite = new PIXI.Sprite(this.gameTextures[spriteID]) as Sprite
       array[idx] = blobSprite
@@ -195,13 +219,13 @@ export default class TreasureHunter extends React.Component {
   }
 
   positionBlobsRandomly = () => {
-    const offsetFromLeft = this.DungeonWallWidth + 100
+    const offsetFromWall = this.DungeonWallWidth + 100
     const blobToblobSpacing = 50
     const speed = 2
     let direction = 1
     this.allSprites.blobs.forEach((blobSprite, idx) => {
-      blobSprite.x = idx * blobToblobSpacing + offsetFromLeft
-      blobSprite.y = randomNumberInBetween(0, this.playScene.height - blobSprite.height)
+      blobSprite.x = randomNumberInBetween(offsetFromWall, this.GAME_WIDTH - offsetFromWall)
+      blobSprite.y = randomNumberInBetween(0, this.GAME_HEIGHT - blobSprite.height)
       
       //Set the blob's vertical velocity. `direction` will be either `1` or
       //`-1`. `1` means the enemy will move down and `-1` means the blob will
@@ -217,31 +241,40 @@ export default class TreasureHunter extends React.Component {
   }
 
   createHealthBar = () => {
-    this.healthBar = new PIXI.Container() as HealthBarContainer
-    this.healthBar.position.set(this.playScene.width - 170, 4)
+    this.healthBarContainer = new PIXI.Container() as HealthBarContainer
     
+    const label = new PIXI.Text('Health', {
+      fontFamily: "Futura",
+      fontSize: this.HealthBarHeight,
+      fill: "white"
+    })
+    label.position.set(0, 0)
+    this.healthBarContainer.addChild(label)
+
     //Create the black background rectangle
     const innerBar = new PIXI.Graphics()
     innerBar.beginFill(0x000000)
-    innerBar.drawRect(0, 0, 128, 8)
+    innerBar.drawRect(label.width + 10, 0, this.HealthBarWidth, this.HealthBarHeight)
     innerBar.endFill()
-    this.healthBar.addChild(innerBar)
+    this.healthBarContainer.addChild(innerBar)
 
     //Create the front red rectangle
     const outerBar = new PIXI.Graphics()
-    outerBar.beginFill(0xFF3300)
-    outerBar.drawRect(0, 0, 128, 8)
+    outerBar.beginFill(0x00FF00)
+    outerBar.drawRect(label.width + 10, 0, this.HealthBarWidth, this.HealthBarHeight)
     outerBar.endFill()
-    this.healthBar.addChild(outerBar)
+    this.healthBarContainer.addChild(outerBar)
 
-    this.healthBar.outer = outerBar
-    this.playScene.addChild(this.healthBar)
+    const healthBarXPosition = this.GAME_WIDTH - this.DungeonWallWidth - this.healthBarContainer.width
+    this.healthBarContainer.position.set(healthBarXPosition, 4)
+    this.healthBarContainer.outer = outerBar
+    this.playScene.addChild(this.healthBarContainer)
   }
 
   setupGameOverScene = () => {
     const background = new PIXI.Graphics()
     background.beginFill(0x058635)
-    background.drawRect(0, 0, this.pixiApp.stage.width, this.pixiApp.stage.height)
+    background.drawRect(0, 0, this.GAME_WIDTH, this.GAME_HEIGHT)
     background.endFill()
     this.gameOverScene.addChild(background)
     
@@ -251,8 +284,8 @@ export default class TreasureHunter extends React.Component {
       fill: "white"
     })
     this.gameOverSceneMessage = new PIXI.Text('The End!', style)
-    this.gameOverSceneMessage.x = 120
-    this.gameOverSceneMessage.y = this.gameOverScene.height / 2 - 32
+    this.gameOverSceneMessage.x = this.GAME_WIDTH / 2 - this.gameOverSceneMessage.width / 2
+    this.gameOverSceneMessage.y = this.GAME_HEIGHT / 2 - this.gameOverSceneMessage.height / 2
     this.gameOverScene.addChild(this.gameOverSceneMessage)
 
     this.pixiApp.stage.addChild(this.gameOverScene)
@@ -276,6 +309,8 @@ export default class TreasureHunter extends React.Component {
     explorer.y += explorer.vy
 
     contain(explorer, this.movablePlaySceneAreaDims)
+
+    let isExplorerHit = false
     
     blobs.forEach((blob) => {
       //Move the blob
@@ -293,21 +328,19 @@ export default class TreasureHunter extends React.Component {
       //Test for a collision. If any of the enemies are touching
       //the explorer, set `explorerHit` to `true`
       if(hitTestRectangle(explorer, blob)) {
-        this.isExplorerHit = true;
-      }
-
-      if(this.isExplorerHit) {
-        //Make the explorer semi-transparent
-        explorer.alpha = 0.5
-        //Reduce the width of the health bar's inner rectangle by 1 pixel
-        this.healthBar.outer.width -= 5
-        //reset
-        this.isExplorerHit = false
-      } else {
-        //Make the explorer fully opaque (non-transparent) if it hasn't been hit
-        explorer.alpha = 1
+        isExplorerHit = true;
       }
     })
+    if(isExplorerHit) {
+      //Make the explorer semi-transparent
+      explorer.alpha = 0.5
+      //Reduce the width of the health bar's inner rectangle by 1 pixel
+      this.healthBarContainer.outer.width -= 1
+      //reset
+    } else {
+      //Make the explorer fully opaque (non-transparent) if it hasn't been hit
+      explorer.alpha = 1
+    }
 
     if (hitTestRectangle(explorer, treasure)) {
       treasure.x = explorer.x + 8
@@ -319,7 +352,7 @@ export default class TreasureHunter extends React.Component {
       this.gameOverSceneMessage.text = "You won!"
     }
 
-    if (this.healthBar.outer.width < 0) {
+    if (this.healthBarContainer.outer.width < 0) {
       this.gameState = this.end
       this.gameOverSceneMessage.text = "You lost!"
     }
