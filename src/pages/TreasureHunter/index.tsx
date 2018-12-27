@@ -43,7 +43,7 @@ export interface AreaDims {
 }
 
 export default class TreasureHunter extends React.Component {
-  page!: HTMLDivElement
+  pixiViewWrapperEle!: HTMLDivElement
   pixiApp!: PIXI.Application
   pixiLoader = PIXI.loader
   allSprites = {} as AllSprites
@@ -88,7 +88,7 @@ export default class TreasureHunter extends React.Component {
     this.pixiApp.renderer.view.style.top = '0px'
     this.pixiApp.renderer.view.style.left = '0px'
     this.resize()
-    this.page.appendChild(this.pixiApp.view)
+    this.pixiViewWrapperEle.appendChild(this.pixiApp.view)
     window.addEventListener('resize', this.resize)
     this.pixiLoader
       .add({name: 'GameTextureAtlas', url: '/game-assets/pixi-treasure-hunter-game.json'})
@@ -317,7 +317,7 @@ export default class TreasureHunter extends React.Component {
       blob.y += blob.vy
 
       //Check the blob's screen boundaries
-      let blobHitsWall = contain(blob, this.movablePlaySceneAreaDims);
+      let blobHitsWall = contain(blob, this.movablePlaySceneAreaDims)
 
       //If the blob hits the top or bottom of the stage, reverse
       //its direction
@@ -364,12 +364,17 @@ export default class TreasureHunter extends React.Component {
   }
 
   componentDidMount = () => {
-    this.setupGame()
+    if (this.pixiViewWrapperEle) {
+      this.setupGame()
+    }
   }
 
   render() {
     return (
-      <s.Page ref={((pageEle: HTMLDivElement) => {this.page = pageEle})}></s.Page>
+      <s.Page>
+        <s.PixiViewWrapper ref={((pixiViewWrapperEle: HTMLDivElement) => {this.pixiViewWrapperEle = pixiViewWrapperEle})}>
+        </s.PixiViewWrapper>
+      </s.Page>
     )
   }
 }
