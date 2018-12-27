@@ -64,7 +64,11 @@
   "scripts": {
     "start": "node scripts/start.js",
     "build": "node scripts/build.js",
-    "test": "node scripts/test.js"
+    "test": "node scripts/test.js",
+    "predeploy": "yarn build",
+    "deploy": "sh deploy/deploy.sh",
+    "predeployToGH": "yarn build",
+    "deployToGH": "gh-pages --dist build --repo https://github.com/shksa/pixi-treasure-hunter-game.git"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -78,7 +82,8 @@
   "devDependencies": {
     "@types/pixi.js": "^4.8.6",
     "@types/styled-components": "^4.1.4",
-    "babel-plugin-styled-components": "^1.10.0"
+    "babel-plugin-styled-components": "^1.10.0",
+    "gh-pages": "^2.0.1"
   },
   "jest": {
     "collectCoverageFrom": [
