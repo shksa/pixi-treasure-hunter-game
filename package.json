@@ -1,5 +1,6 @@
 {
   "name": "pixi-treasure-hunter-game",
+  "homepage": "PixiTreasureHunter",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
