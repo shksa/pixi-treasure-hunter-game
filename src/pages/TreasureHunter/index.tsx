@@ -91,7 +91,7 @@ export default class TreasureHunter extends React.Component {
     this.pixiViewWrapperEle.appendChild(this.pixiApp.view)
     window.addEventListener('resize', this.resize)
     this.pixiLoader
-      .add({name: 'GameTextureAtlas', url: '/game-assets/pixi-treasure-hunter-game.json'})
+      .add({name: 'GameTextureAtlas', url: `${process.env.PUBLIC_URL}/game-assets/pixi-treasure-hunter-game.json`})
       .load(this.setupGameScenes)
   }
 
