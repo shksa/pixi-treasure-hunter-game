@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
 
 importScripts(
-  "/PixiTreasureHunter/precache-manifest.b7fa14b7fa589980486856eb5c85a352.js"
+  "/PixiTreasureHunter/precache-manifest.0e55e18451f1da5b9e0eb4448cddd671.js"
 );
 
 workbox.clientsClaim();
